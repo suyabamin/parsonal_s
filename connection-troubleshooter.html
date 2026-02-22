@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Drive Connection Troubleshooter</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .test-section { margin: 25px 0; padding: 20px; border-left: 5px solid #007bff; background: #f8f9ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; }
+        .success { border-left-color: #28a745; background: #f0fff4; }
+        .warning { border-left-color: #ffc107; background: #fffdf0; }
+        button { padding: 12px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button.success { background: #28a745; }
+        button.warning { background: #ffc107; color: black; }
+        .result { margin: 15px 0; padding: 15px; border-radius: 5px; }
+        .error-text { color: #dc3545; font-weight: bold; }
+        .success-text { color: #28a745; font-weight: bold; }
+        .code-block { background: #f1f1f1; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0; }
+        .checklist { margin: 15px 0; }
+        .checklist li { margin: 10px 0; padding: 8px; background: white; border-radius: 5px; }
+        .step-number { display: inline-block; width: 25px; height: 25px; background: #007bff; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Google Drive Connection Troubleshooter</h1>
+        <p>Let's diagnose and fix your "Failed to fetch" error step by step:</p>
+
+        <div class="test-section">
+            <h2><span class="step-number">1</span> Test Your Current URL</h2>
+            <p>Click the button below to test your new Google Apps Script URL:</p>
+            <button onclick="testCurrentUrl()">Test Connection</button>
+            <div id="url-test-result"></div>
+        </div>
+
+        <div class="test-section warning">
+            <h2><span class="step-number">2</span> Verify Deployment Settings</h2>
+            <p>These are the most common causes of "Failed to fetch" errors:</p>
+            <div class="checklist">
+                <li>✅ <strong>Deployment Type</strong>: Must be "Web app" (not API executable)</li>
+                <li>✅ <strong>Execute as</strong>: Must be "Me (your-email@gmail.com)"</li>
+                <li>✅ <strong>Who has access</strong>: Should be "Anyone" for testing</li>
+                <li>✅ <strong>New Version</strong>: Make sure you clicked "Deploy" after changes</li>
+            </div>
+            <button class="warning" onclick="showDeploymentGuide()">Show Deployment Guide</button>
+        </div>
+
+        <div class="test-section error">
+            <h2><span class="step-number">3</span> Common Solutions</h2>
+            <div id="solutions">
+                <h3>If Test Fails:</h3>
+                <ul>
+                    <li>❌ <strong>404 Error</strong>: URL is incorrect or expired - redeploy</li>
+                    <li>❌ <strong>CORS Error</strong>: Deployment settings wrong - check access level</li>
+                    <li>❌ <strong>Authentication Error</strong>: "Execute as" setting wrong - must be "Me"</li>
+                    <li>❌ <strong>Permission Denied</strong>: "Who has access" too restrictive - set to "Anyone"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section success">
+            <h2><span class="step-number">4</span> Quick Fix Process</h2>
+            <ol>
+                <li>Go to your Google Apps Script project</li>
+                <li>Click "Deploy" > "Manage deployments"</li>
+                <li>Click the edit icon (pencil) on your deployment</li>
+                <li>Verify all settings match the checklist above</li>
+                <li>Click "Deploy" to create a new version</li>
+                <li>Copy the new URL and update it in your script.js file</li>
+                <li>Test again using the button above</li>
+            </ol>
+            <button class="success" onclick="window.location.reload()">Refresh This Page After Fixing</button>
+        </div>
+    </div>
+
+    <script>
+        async function testCurrentUrl() {
+            const resultDiv = document.getElementById('url-test-result');
+            resultDiv.innerHTML = '<div class="result" style="background: #fff3cd;"><p>🔄 Testing connection... Please wait.</p></div>';
+            
+            try {
+                console.log('Testing URL: https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec');
+                
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'testConnection'
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Response data:', result);
+                    
+                    if (result.success) {
+                        resultDiv.innerHTML = `
+                            <div class="result" style="background: #d4edda;">
+                                <h3 class="success-text">✅ SUCCESS! Connection Working</h3>
+                                <p><strong>Message:</strong> ${result.message}</p>
+                                <p><strong>Timestamp:</strong> ${result.timestamp}</p>
+                                <p>Your Google Drive integration should now work properly!</p>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error(result.error || 'Connection test returned failure');
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                resultDiv.innerHTML = `
+                    <div class="result" style="background: #f8d7da;">
+                        <h3 class="error-text">❌ CONNECTION FAILED</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Possible causes:</strong></p>
+                        <ul>
+                            <li>Deployment settings incorrect (most common)</li>
+                            <li>URL expired or invalid</li>
+                            <li>CORS restrictions</li>
+                            <li>Authentication issues</li>
+                        </ul>
+                        <p><strong>Next step:</strong> Check your Google Apps Script deployment settings</p>
+                    </div>
+                `;
+            }
+        }
+
+        function showDeploymentGuide() {
+            alert(`GOOGLE APPS SCRIPT DEPLOYMENT CHECKLIST:
+
+1. Go to script.google.com
+2. Open your project
+3. Click "Deploy" > "Manage deployments"
+4. Click edit icon (pencil)
+5. Verify these EXACT settings:
+   - Type: Web app
+   - Execute as: Me (your email)
+   - Who has access: Anyone
+6. Click "Deploy" 
+7. Copy new URL
+8. Update in script.js file
+9. Test connection again`);
+        }
+    </script>
+</body>
+</html>

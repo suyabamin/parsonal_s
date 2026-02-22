@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Drive Connection Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .step { margin: 25px 0; padding: 20px; border-left: 5px solid #007bff; background: #f8f9ff; }
+        .error { border-left-color: #dc3545; background: #fff5f5; }
+        .success { border-left-color: #28a745; background: #f0fff4; }
+        .warning { border-left-color: #ffc107; background: #fffdf0; }
+        button { padding: 12px 25px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        button.success { background: #28a745; }
+        button.warning { background: #ffc107; color: black; }
+        button.error { background: #dc3545; }
+        .result { margin: 15px 0; padding: 15px; border-radius: 5px; }
+        .error-text { color: #dc3545; font-weight: bold; }
+        .success-text { color: #28a745; font-weight: bold; }
+        .checklist { margin: 15px 0; }
+        .checklist li { margin: 10px 0; padding: 8px; background: white; border-radius: 5px; }
+        .step-number { display: inline-block; width: 25px; height: 25px; background: #007bff; color: white; border-radius: 50%; text-align: center; line-height: 25px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Google Drive Connection</h1>
+        <p>Follow these steps to fix the "Drive server disconnected" issue:</p>
+
+        <div class="step warning">
+            <h2><span class="step-number">1</span> Verify Google Apps Script Deployment</h2>
+            <p>Most common cause of disconnection is incorrect deployment settings:</p>
+            <div class="checklist">
+                <li>✅ Go to <a href="https://script.google.com/" target="_blank">script.google.com</a></li>
+                <li>✅ Open your Omni-Vault project</li>
+                <li>✅ Click "Deploy" > "Manage deployments"</li>
+                <li>✅ Verify these exact settings:</li>
+                <ul>
+                    <li><strong>Type</strong>: Web app</li>
+                    <li><strong>Execute as</strong>: Me (your email)</li>
+                    <li><strong>Who has access</strong>: Anyone (or Anyone with Google account)</li>
+                </ul>
+                <li>✅ Click "Deploy" to create a new version</li>
+                <li>✅ Copy the NEW URL that appears</li>
+            </div>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">2</span> Test Connection with Your Current URL</h2>
+            <p>Current URL in script.js: <code>https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec</code></p>
+            <button onclick="testCurrentUrl()">Test This URL</button>
+            <div id="url-test-result"></div>
+        </div>
+
+        <div class="step error">
+            <h2><span class="step-number">3</span> Common Issues & Fixes</h2>
+            <div class="checklist">
+                <li>❌ <strong>Deployment Type Wrong</strong>: Must be "Web app", not "API executable"</li>
+                <li>❌ <strong>Access Level Too Restricted</strong>: Set to "Anyone" for testing</li>
+                <li>❌ <strong>Old Version</strong>: Need to redeploy for new version</li>
+                <li>❌ <strong>Missing Functions</strong>: Verify testConnection function exists</li>
+            </div>
+        </div>
+
+        <div class="step success">
+            <h2><span class="step-number">4</span> Update Script URL if Needed</h2>
+            <p>If you get a new URL from redeployment:</p>
+            <ol>
+                <li>Open <code>d:\ps\script.js</code> in a text editor</li>
+                <li>Find the line: <code>const SCRIPT_URL = '...';</code></li>
+                <li>Replace the URL with your new deployment URL</li>
+                <li>Save the file</li>
+            </ol>
+            <button class="success" onclick="showUpdateInstructions()">Show Detailed Instructions</button>
+        </div>
+
+        <div class="step">
+            <h2><span class="step-number">5</span> Final Verification</h2>
+            <p>After fixing deployment:</p>
+            <ol>
+                <li>Refresh your <code>index.html</code> page</li>
+                <li>Check if status shows "Drive Connected"</li>
+                <li>Try uploading a small test file</li>
+                <li>Verify file appears in your Google Drive</li>
+            </ol>
+            <button onclick="window.open('index.html', '_blank')">Open Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        async function testCurrentUrl() {
+            const resultDiv = document.getElementById('url-test-result');
+            resultDiv.innerHTML = '<div class="result" style="background: #fff3cd;"><p>🔄 Testing connection... Please wait.</p></div>';
+            
+            const currentUrl = 'https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec';
+            
+            try {
+                console.log('Testing URL:', currentUrl);
+                
+                const response = await fetch(currentUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'testConnection'
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('Response is not valid JSON:', responseText);
+                    throw new Error(`Invalid response format: ${responseText}`);
+                }
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result" style="background: #d4edda;">
+                            <h3 class="success-text">✅ SUCCESS! Connection Working</h3>
+                            <p><strong>Message:</strong> ${result.message || 'Connection successful'}</p>
+                            <p><strong>Timestamp:</strong> ${result.timestamp || 'N/A'}</p>
+                            <p>Your Google Drive integration should now work properly!</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Connection test returned failure');
+                }
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                resultDiv.innerHTML = `
+                    <div class="result" style="background: #f8d7da;">
+                        <h3 class="error-text">❌ CONNECTION FAILED</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Issue:</strong> The deployment needs to be fixed</p>
+                        <p><strong>Action:</strong> Follow Step 1 to redeploy your Google Apps Script</p>
+                    </div>
+                `;
+            }
+        }
+
+        function showUpdateInstructions() {
+            alert(`HOW TO UPDATE SCRIPT.JS WITH NEW URL:
+
+1. Open d:\\ps\\script.js in a text editor (like Notepad++)
+2. Find the line that starts with: const SCRIPT_URL =
+3. It looks like: const SCRIPT_URL = 'https://script.google.com/macros/s/.../exec';
+4. Replace the entire URL (between the quotes) with your new deployment URL
+5. Save the file
+6. Refresh your index.html page
+
+Make sure to replace only the URL part, keeping the 'const SCRIPT_URL =' part.`);
+        }
+    </script>
+</body>
+</html>

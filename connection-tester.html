@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Apps Script Connection Tester</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border-radius: 5px; background: #f8f9ff; }
+        .success { background: #d4edda; border-left: 5px solid #28a745; }
+        .error { background: #f8d7da; border-left: 5px solid #dc3545; }
+        .info { background: #d1ecf1; border-left: 5px solid #17a2b8; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin: 5px; }
+        button:hover { background: #0056b3; }
+        button.success { background: #28a745; }
+        button.error { background: #dc3545; }
+        .result { margin: 15px 0; padding: 10px; border-radius: 4px; }
+        .code { background: #f1f1f1; padding: 10px; border-radius: 4px; font-family: monospace; }
+        .steps { background: #fff3cd; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google Apps Script Connection Tester</h1>
+        
+        <div class="section info">
+            <h2>Current URL Being Tested</h2>
+            <div class="code">https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec</div>
+        </div>
+
+        <div class="section">
+            <h2>Connection Test</h2>
+            <button onclick="testConnection()">Test Connection</button>
+            <button onclick="testCORS()">Test CORS Headers</button>
+            <div id="test-result"></div>
+        </div>
+
+        <div class="section">
+            <h2>Deployment Checklist</h2>
+            <div class="steps">
+                <h3>Verify Your Google Apps Script Deployment:</h3>
+                <ol>
+                    <li>Go to <a href="https://script.google.com/" target="_blank">Google Apps Script</a></li>
+                    <li>Open your Omni-Vault project</li>
+                    <li>Click "Deploy" → "Manage deployments"</li>
+                    <li>Click the edit icon (pencil) next to your deployment</li>
+                    <li>Ensure these exact settings:</li>
+                    <ul>
+                        <li><strong>Type:</strong> Web app</li>
+                        <li><strong>Execute as:</strong> Me (your email)</li>
+                        <li><strong>Who has access:</strong> Anyone (or Anyone with Google account)</li>
+                    </ul>
+                    <li>Click "Deploy" to create a new version</li>
+                    <li>Copy the NEW web app URL</li>
+                    <li>Update it in your script.js file</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section error">
+            <h2>Common Issues & Solutions</h2>
+            <ul>
+                <li><strong>Deployment Type:</strong> Must be "Web app" (not API executable)</li>
+                <li><strong>Access Level:</strong> Must be "Anyone" for external access</li>
+                <li><strong>Execution:</strong> Must be "Me (your email)"</li>
+                <li><strong>Version:</strong> Ensure you're using the latest deployment URL</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<div class="result" style="background: #fff3cd;">🔄 Testing connection...</div>';
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'testConnection'
+                    })
+                });
+                
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const responseText = await response.text();
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('Response is not valid JSON:', responseText);
+                    throw new Error(`Invalid response format: ${responseText}`);
+                }
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ SUCCESS! Connected to Google Apps Script</h3>
+                            <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                            <p><strong>Response Time:</strong> ${responseTime}ms</p>
+                            <p><strong>Message:</strong> ${result.message || 'Connection successful!'}</p>
+                            <p><strong>Timestamp:</strong> ${result.timestamp || 'N/A'}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Connection Returned Error</h3>
+                            <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                            <p><strong>Response:</strong> ${JSON.stringify(result)}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Connection Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Possible Causes:</strong></p>
+                        <ul>
+                            <li>Incorrect deployment settings</li>
+                            <li>URL has expired or is incorrect</li>
+                            <li>Access permissions not set to "Anyone"</li>
+                            <li>Need to redeploy the script</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testCORS() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<div class="result" style="background: #fff3cd;">🔄 Testing CORS headers...</div>';
+            
+            try {
+                // Attempt to make a request with mode 'cors' to see what happens
+                const response = await fetch('https://script.google.com/macros/s/AKfycbzMFT8H6LyjVm3CDs9VR8ON25qfZ1YRO4AnXP5ETopVXMWTPt_5agUKWka-FyGrE8iieQ/exec', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'testConnection'
+                    })
+                });
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <h3>✅ CORS Test Result</h3>
+                        <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                        <p>CORS headers are properly configured.</p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ CORS Test Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>This confirms that the deployment settings need to be fixed.</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
