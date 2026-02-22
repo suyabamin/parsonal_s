@@ -125,7 +125,10 @@ function setupFileVaultsEvents() {
     const pdfUploadInput = document.getElementById('pdf-upload');
     const pdfsSearch = document.getElementById('pdfs-search');
     
-    uploadPdfBtn.addEventListener('click', () => pdfUploadInput.click());
+    uploadPdfBtn.addEventListener('click', () => {
+        console.log('PDF upload button clicked');
+        pdfUploadInput.click();
+    });
     pdfUploadInput.addEventListener('change', handlePdfUpload);
     pdfsSearch.addEventListener('input', filterPdfs);
     
@@ -134,7 +137,10 @@ function setupFileVaultsEvents() {
     const imageUploadInput = document.getElementById('image-upload');
     const imagesSearch = document.getElementById('images-search');
     
-    uploadImageBtn.addEventListener('click', () => imageUploadInput.click());
+    uploadImageBtn.addEventListener('click', () => {
+        console.log('Image upload button clicked');
+        imageUploadInput.click();
+    });
     imageUploadInput.addEventListener('change', handleImageUpload);
     imagesSearch.addEventListener('input', filterImages);
     
@@ -143,7 +149,10 @@ function setupFileVaultsEvents() {
     const videoUploadInput = document.getElementById('video-upload');
     const videosSearch = document.getElementById('videos-search');
     
-    uploadVideoBtn.addEventListener('click', () => videoUploadInput.click());
+    uploadVideoBtn.addEventListener('click', () => {
+        console.log('Video upload button clicked');
+        videoUploadInput.click();
+    });
     videoUploadInput.addEventListener('change', handleVideoUpload);
     videosSearch.addEventListener('input', filterVideos);
     
@@ -598,14 +607,21 @@ function handlePdfUpload(event) {
         const fileData = e.target.result;
         
         try {
-            // Simulate saving to Google Drive
+            console.log('Attempting to upload PDF to Google Drive...');
+            // Save to Google Drive via Apps Script
             const driveResponse = await window.api.saveToDrive(fileData, file.name, 'pdf');
+            console.log('Drive response:', driveResponse);
+            
+            if (!driveResponse.success) {
+                throw new Error(driveResponse.error || 'Failed to save to Drive');
+            }
             
             // Create PDF object
             const pdf = {
                 id: Date.now(),
                 name: file.name,
                 dataUrl: fileData,
+                fileId: driveResponse.fileId, // Store the Google Drive file ID
                 size: formatFileSize(file.size),
                 timestamp: new Date().toLocaleString()
             };
@@ -623,10 +639,27 @@ function handlePdfUpload(event) {
             event.target.value = '';
             
             // Show success message
-            showMessage('PDF uploaded successfully!');
+            showMessage('PDF uploaded successfully to Google Drive!');
         } catch (error) {
-            console.error('Error uploading PDF:', error);
-            showMessage('Error uploading PDF. Please try again.', 'error');
+            console.error('Error uploading PDF to Google Drive:', error);
+            
+            // Fallback to localStorage only
+            console.log('Falling back to localStorage storage...');
+            const pdf = {
+                id: Date.now(),
+                name: file.name,
+                dataUrl: fileData,
+                size: formatFileSize(file.size),
+                timestamp: new Date().toLocaleString(),
+                storage: 'localStorage' // Mark as localStorage storage
+            };
+            
+            window.knowledgeBase.pdfs.unshift(pdf);
+            saveData();
+            renderPdfs();
+            event.target.value = '';
+            
+            showMessage('PDF saved locally (Google Drive unavailable). Error: ' + error.message, 'error');
         }
     };
     reader.readAsDataURL(file);
@@ -643,6 +676,10 @@ function renderPdfs() {
     }
     
     window.knowledgeBase.pdfs.forEach(pdf => {
+        const storageIndicator = pdf.storage === 'localStorage' 
+            ? '<span class="text-yellow-500 text-xs">Local</span>' 
+            : '<span class="text-green-500 text-xs">Drive</span>';
+            
         const pdfCard = document.createElement('div');
         pdfCard.className = 'file-card bg-white/20 dark:bg-gray-800/30 flex flex-col items-center';
         pdfCard.innerHTML = `
@@ -650,7 +687,12 @@ function renderPdfs() {
                 <i class="fas fa-file-pdf text-4xl text-red-500 mb-2"></i>
                 <h3 class="font-semibold text-gray-800 dark:text-white text-center">${pdf.name}</h3>
             </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">${pdf.size} • ${pdf.timestamp}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 text-center mb-2">
+                ${pdf.size} • ${pdf.timestamp}
+            </div>
+            <div class="text-xs text-center mb-3">
+                ${storageIndicator}
+            </div>
             <div class="flex justify-center space-x-2">
                 <button class="view-pdf-btn text-blue-500 hover:text-blue-700" data-id="${pdf.id}">
                     <i class="fas fa-eye"></i>
@@ -764,14 +806,21 @@ function handleImageUpload(event) {
         const fileData = e.target.result;
         
         try {
-            // Simulate saving to Google Drive
+            console.log('Attempting to upload image to Google Drive...');
+            // Save to Google Drive via Apps Script
             const driveResponse = await window.api.saveToDrive(fileData, file.name, 'image');
+            console.log('Drive response:', driveResponse);
+            
+            if (!driveResponse.success) {
+                throw new Error(driveResponse.error || 'Failed to save to Drive');
+            }
             
             // Create image object
             const image = {
                 id: Date.now(),
                 name: file.name,
                 dataUrl: fileData,
+                fileId: driveResponse.fileId, // Store the Google Drive file ID
                 size: formatFileSize(file.size),
                 timestamp: new Date().toLocaleString()
             };
@@ -789,10 +838,27 @@ function handleImageUpload(event) {
             event.target.value = '';
             
             // Show success message
-            showMessage('Image uploaded successfully!');
+            showMessage('Image uploaded successfully to Google Drive!');
         } catch (error) {
-            console.error('Error uploading image:', error);
-            showMessage('Error uploading image. Please try again.', 'error');
+            console.error('Error uploading image to Google Drive:', error);
+            
+            // Fallback to localStorage only
+            console.log('Falling back to localStorage storage...');
+            const image = {
+                id: Date.now(),
+                name: file.name,
+                dataUrl: fileData,
+                size: formatFileSize(file.size),
+                timestamp: new Date().toLocaleString(),
+                storage: 'localStorage' // Mark as localStorage storage
+            };
+            
+            window.knowledgeBase.images.unshift(image);
+            saveData();
+            renderImages();
+            event.target.value = '';
+            
+            showMessage('Image saved locally (Google Drive unavailable). Error: ' + error.message, 'error');
         }
     };
     reader.readAsDataURL(file);
@@ -809,6 +875,10 @@ function renderImages() {
     }
     
     window.knowledgeBase.images.forEach(image => {
+        const storageIndicator = image.storage === 'localStorage' 
+            ? '<span class="text-yellow-500 text-xs">Local</span>' 
+            : '<span class="text-green-500 text-xs">Drive</span>';
+            
         const imageCard = document.createElement('div');
         imageCard.className = 'file-card bg-white/20 dark:bg-gray-800/30 flex flex-col items-center overflow-hidden';
         imageCard.innerHTML = `
@@ -821,7 +891,10 @@ function renderImages() {
                     <span>${image.size}</span>
                     <span>${image.timestamp}</span>
                 </div>
-                <div class="flex justify-center space-x-2 mt-2">
+                <div class="text-xs text-center mt-1 mb-2">
+                    ${storageIndicator}
+                </div>
+                <div class="flex justify-center space-x-2">
                     <button class="download-image-btn text-green-500 hover:text-green-700" data-id="${image.id}">
                         <i class="fas fa-download"></i>
                     </button>
@@ -926,14 +999,21 @@ function handleVideoUpload(event) {
         const fileData = e.target.result;
         
         try {
-            // Simulate saving to Google Drive
+            console.log('Attempting to upload video to Google Drive...');
+            // Save to Google Drive via Apps Script
             const driveResponse = await window.api.saveToDrive(fileData, file.name, 'video');
+            console.log('Drive response:', driveResponse);
+            
+            if (!driveResponse.success) {
+                throw new Error(driveResponse.error || 'Failed to save to Drive');
+            }
             
             // Create video object
             const video = {
                 id: Date.now(),
                 name: file.name,
                 dataUrl: fileData,
+                fileId: driveResponse.fileId, // Store the Google Drive file ID
                 size: formatFileSize(file.size),
                 timestamp: new Date().toLocaleString()
             };
@@ -951,10 +1031,27 @@ function handleVideoUpload(event) {
             event.target.value = '';
             
             // Show success message
-            showMessage('Video uploaded successfully!');
+            showMessage('Video uploaded successfully to Google Drive!');
         } catch (error) {
-            console.error('Error uploading video:', error);
-            showMessage('Error uploading video. Please try again.', 'error');
+            console.error('Error uploading video to Google Drive:', error);
+            
+            // Fallback to localStorage only
+            console.log('Falling back to localStorage storage...');
+            const video = {
+                id: Date.now(),
+                name: file.name,
+                dataUrl: fileData,
+                size: formatFileSize(file.size),
+                timestamp: new Date().toLocaleString(),
+                storage: 'localStorage' // Mark as localStorage storage
+            };
+            
+            window.knowledgeBase.videos.unshift(video);
+            saveData();
+            renderVideos();
+            event.target.value = '';
+            
+            showMessage('Video saved locally (Google Drive unavailable). Error: ' + error.message, 'error');
         }
     };
     reader.readAsDataURL(file);
@@ -971,6 +1068,10 @@ function renderVideos() {
     }
     
     window.knowledgeBase.videos.forEach(video => {
+        const storageIndicator = video.storage === 'localStorage' 
+            ? '<span class="text-yellow-500 text-xs">Local</span>' 
+            : '<span class="text-green-500 text-xs">Drive</span>';
+            
         const videoCard = document.createElement('div');
         videoCard.className = 'file-card bg-white/20 dark:bg-gray-800/30 flex flex-col items-center';
         videoCard.innerHTML = `
@@ -978,7 +1079,10 @@ function renderVideos() {
                 <i class="fas fa-video text-4xl text-yellow-500"></i>
             </div>
             <h3 class="font-semibold text-gray-800 dark:text-white text-center mb-2">${video.name}</h3>
-            <div class="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">${video.size} • ${video.timestamp}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 text-center mb-2">${video.size} • ${video.timestamp}</div>
+            <div class="text-xs text-center mb-3">
+                ${storageIndicator}
+            </div>
             <div class="flex justify-center space-x-2">
                 <button class="play-video-btn text-blue-500 hover:text-blue-700" data-id="${video.id}">
                     <i class="fas fa-play-circle"></i>
@@ -1281,6 +1385,7 @@ const api = {
     // Save to Google Sheet via Apps Script
     saveToSheet: async (data, sheetType) => {
         try {
+            console.log('Sending request to save to sheet:', { data, sheetType });
             const response = await fetch('https://script.google.com/macros/s/AKfycbyt83zzd9MvrnfTBdFdZh8MaYLneA-5cKYKTcallFpANOTC8yLV2-5We-_1FR0zr0Abvw/exec', {
                 method: 'POST',
                 headers: {
@@ -1293,7 +1398,9 @@ const api = {
                 })
             });
             
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response result:', result);
             return result;
         } catch (error) {
             console.error('Error saving to sheet:', error);
@@ -1304,6 +1411,7 @@ const api = {
     // Read from Google Sheet via Apps Script
     readFromSheet: async (sheetType) => {
         try {
+            console.log('Sending request to read from sheet:', { sheetType });
             const response = await fetch('https://script.google.com/macros/s/AKfycbyt83zzd9MvrnfTBdFdZh8MaYLneA-5cKYKTcallFpANOTC8yLV2-5We-_1FR0zr0Abvw/exec', {
                 method: 'POST',
                 headers: {
@@ -1315,7 +1423,9 @@ const api = {
                 })
             });
             
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response result:', result);
             return result.data || [];
         } catch (error) {
             console.error('Error reading from sheet:', error);
@@ -1326,6 +1436,7 @@ const api = {
     // Save to Google Drive via Apps Script
     saveToDrive: async (fileData, fileName, fileType) => {
         try {
+            console.log('Sending request to save to drive:', { fileName, fileType });
             const response = await fetch('https://script.google.com/macros/s/AKfycbyt83zzd9MvrnfTBdFdZh8MaYLneA-5cKYKTcallFpANOTC8yLV2-5We-_1FR0zr0Abvw/exec', {
                 method: 'POST',
                 headers: {
@@ -1339,7 +1450,9 @@ const api = {
                 })
             });
             
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response result:', result);
             return result;
         } catch (error) {
             console.error('Error saving to drive:', error);
@@ -1350,6 +1463,7 @@ const api = {
     // Read from Google Drive via Apps Script
     readFromDrive: async (fileId) => {
         try {
+            console.log('Sending request to read from drive:', { fileId });
             const response = await fetch('https://script.google.com/macros/s/AKfycbyt83zzd9MvrnfTBdFdZh8MaYLneA-5cKYKTcallFpANOTC8yLV2-5We-_1FR0zr0Abvw/exec', {
                 method: 'POST',
                 headers: {
@@ -1361,7 +1475,9 @@ const api = {
                 })
             });
             
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response result:', result);
             return result;
         } catch (error) {
             console.error('Error reading from drive:', error);

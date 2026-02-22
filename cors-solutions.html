@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test and Solutions</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .error { color: red; }
+        .success { color: green; }
+        button { padding: 10px 15px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Google Apps Script CORS Test and Solutions</h1>
+    
+    <div class="test-section">
+        <h2>Current Issue: Failed to fetch</h2>
+        <p>This error typically occurs due to:</p>
+        <ul>
+            <li>CORS policy restrictions</li>
+            <li>Incorrect deployment settings</li>
+            <li>Web app not properly configured</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Solution 1: Check Deployment Settings</h2>
+        <p>Go to your Google Apps Script project and verify:</p>
+        <ol>
+            <li>Click "Deploy" > "Manage deployments"</li>
+            <li>Edit your current deployment</li>
+            <li>Ensure these settings:</li>
+            <ul>
+                <li><strong>Type</strong>: Web app</li>
+                <li><strong>Execute as</strong>: Me (your email)</li>
+                <li><strong>Who has access</strong>: Anyone (or "Anyone with Google account")</li>
+            </ul>
+            <li>Click "Deploy" to create a new version</li>
+            <li>Copy the new URL and update it in your script.js file</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Solution 2: Alternative Testing Method</h2>
+        <button onclick="testWithProxy()">Test with Proxy Method</button>
+        <div id="proxy-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Solution 3: Direct File Upload Test</h2>
+        <p>Try uploading a small file to see if the fallback mechanism works:</p>
+        <input type="file" id="test-file" accept="image/*">
+        <button onclick="testFileUpload()">Test File Upload</button>
+        <div id="upload-result"></div>
+    </div>
+
+    <script>
+        async function testWithProxy() {
+            const resultDiv = document.getElementById('proxy-result');
+            resultDiv.innerHTML = 'Testing with proxy method...';
+            
+            try {
+                // Try a different approach using a proxy or JSONP-like method
+                const script = document.createElement('script');
+                const callbackName = 'callback_' + Date.now();
+                
+                window[callbackName] = function(data) {
+                    resultDiv.innerHTML = `
+                        <p class="success">Success! Data received: ${JSON.stringify(data)}</p>
+                    `;
+                    document.head.removeChild(script);
+                    delete window[callbackName];
+                };
+                
+                script.src = 'https://script.google.com/macros/s/AKfycbyt83zzd9MvrnfTBdFdZh8MaYLneA-5cKYKTcallFpANOTC8yLV2-5We-_1FR0zr0Abvw/exec?callback=' + callbackName + '&action=testConnection';
+                script.onerror = function() {
+                    resultDiv.innerHTML = '<p class="error">Proxy method also failed. Check deployment settings.</p>';
+                };
+                
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testFileUpload() {
+            const fileInput = document.getElementById('test-file');
+            const resultDiv = document.getElementById('upload-result');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<p class="error">Please select a file first</p>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                const fileData = e.target.result;
+                
+                resultDiv.innerHTML = 'Testing file upload with fallback...';
+                
+                // Simulate the fallback mechanism
+                const testFile = {
+                    id: Date.now(),
+                    name: file.name,
+                    dataUrl: fileData,
+                    size: (file.size / 1024).toFixed(2) + ' KB',
+                    timestamp: new Date().toLocaleString(),
+                    storage: 'localStorage'
+                };
+                
+                // Store in localStorage
+                let testStorage = JSON.parse(localStorage.getItem('test_files') || '[]');
+                testStorage.push(testFile);
+                localStorage.setItem('test_files', JSON.stringify(testStorage));
+                
+                resultDiv.innerHTML = `
+                    <p class="success">File saved successfully to localStorage!</p>
+                    <p>File name: ${testFile.name}</p>
+                    <p>Size: ${testFile.size}</p>
+                    <p>Storage: ${testFile.storage}</p>
+                `;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>

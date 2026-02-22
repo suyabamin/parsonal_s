@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Google Apps Script Connection</title>
+</head>
+<body>
+    <h1>Test Google Apps Script Connection</h1>
+    <button id="testButton">Test Connection</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testButton').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                console.log('Sending test request to Google Apps Script...');
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyt83zzd9MvrnfTBdFdZh8MaYLneA-5cKYKTcallFpANOTC8yLV2-5We-_1FR0zr0Abvw/exec', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'testConnection'
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response result:', result);
+                
+                resultDiv.innerHTML = `
+                    <h2>Test Results:</h2>
+                    <p>Status: ${response.status}</p>
+                    <p>Success: ${result.success}</p>
+                    <p>Message: ${result.message || result.error || 'No message'}</p>
+                    <p>Full response: ${JSON.stringify(result)}</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h2>Error:</h2>
+                    <p>${error.message}</p>
+                    <p>Check console for more details</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

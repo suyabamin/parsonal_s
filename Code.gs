@@ -25,6 +25,12 @@ function doPost(e) {
       result = saveToDrive(fileData, fileName, fileType);
     } else if (action === 'readFromDrive') {
       result = readFromDrive(fileId);
+    } else if (action === 'testConnection') {
+      result = {
+        success: true,
+        message: 'Connection successful! Google Apps Script is working.',
+        timestamp: new Date().toISOString()
+      };
     } else {
       result.success = false;
       result.error = 'Unknown action: ' + action;
