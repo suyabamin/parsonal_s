@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni-Vault - Personal Knowledge Assistant</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/10 dark:bg-gray-800/10 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Omni-Vault</h1>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Global Search Bar -->
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="global-search" 
+                        placeholder="Search everything..." 
+                        class="px-4 py-2 rounded-full bg-white/20 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 md:w-80 transition-all"
+                    >
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                
+                <!-- Dark/Light Mode Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-full bg-white/20 dark:bg-gray-700/50 hover:bg-gray-200/50 dark:hover:bg-gray-600/50 transition-colors">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Homepage Grid of Feature Cards -->
+        <section id="homepage" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Notes Card -->
+            <div class="feature-card bg-gradient-to-br from-blue-500 to-indigo-600 p-6 rounded-2xl shadow-xl cursor-pointer transform transition-transform hover:scale-105" data-feature="notes">
+                <div class="text-white mb-4">
+                    <i class="fas fa-sticky-note text-3xl mb-3"></i>
+                    <h2 class="text-xl font-bold">Smart Notes</h2>
+                    <p class="text-blue-100 mt-2">Capture and organize your thoughts with rich formatting</p>
+                </div>
+            </div>
+            
+            <!-- Links Card -->
+            <div class="feature-card bg-gradient-to-br from-green-500 to-teal-600 p-6 rounded-2xl shadow-xl cursor-pointer transform transition-transform hover:scale-105" data-feature="links">
+                <div class="text-white mb-4">
+                    <i class="fas fa-link text-3xl mb-3"></i>
+                    <h2 class="text-xl font-bold">Link Vault</h2>
+                    <p class="text-green-100 mt-2">Save and categorize important links</p>
+                </div>
+            </div>
+            
+            <!-- PDFs Card -->
+            <div class="feature-card bg-gradient-to-br from-red-500 to-orange-600 p-6 rounded-2xl shadow-xl cursor-pointer transform transition-transform hover:scale-105" data-feature="pdfs">
+                <div class="text-white mb-4">
+                    <i class="fas fa-file-pdf text-3xl mb-3"></i>
+                    <h2 class="text-xl font-bold">PDFs</h2>
+                    <p class="text-red-100 mt-2">Store and manage your PDF documents</p>
+                </div>
+            </div>
+            
+            <!-- Images Card -->
+            <div class="feature-card bg-gradient-to-br from-purple-500 to-pink-600 p-6 rounded-2xl shadow-xl cursor-pointer transform transition-transform hover:scale-105" data-feature="images">
+                <div class="text-white mb-4">
+                    <i class="fas fa-images text-3xl mb-3"></i>
+                    <h2 class="text-xl font-bold">Images</h2>
+                    <p class="text-purple-100 mt-2">Organize and view your image collection</p>
+                </div>
+            </div>
+            
+            <!-- Videos Card -->
+            <div class="feature-card bg-gradient-to-br from-yellow-500 to-amber-600 p-6 rounded-2xl shadow-xl cursor-pointer transform transition-transform hover:scale-105" data-feature="videos">
+                <div class="text-white mb-4">
+                    <i class="fas fa-video text-3xl mb-3"></i>
+                    <h2 class="text-xl font-bold">Videos</h2>
+                    <p class="text-yellow-100 mt-2">Manage your video content</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Pages (Initially Hidden) -->
+        
+        <!-- Notes Page -->
+        <section id="notes-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Notes Library</h2>
+                <button id="back-to-home-notes" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Back to Home
+                </button>
+            </div>
+            
+            <div class="mb-6 p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button id="bold-btn" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg"><i class="fas fa-bold"></i></button>
+                    <button id="italic-btn" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg"><i class="fas fa-italic"></i></button>
+                    <button id="list-btn" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg"><i class="fas fa-list"></i></button>
+                </div>
+                <textarea id="note-content" class="w-full h-40 p-3 rounded-lg bg-white/20 dark:bg-gray-700/30 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Write your note here..."></textarea>
+                <div class="mt-3 flex justify-end">
+                    <button id="save-note" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Save Note</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <input type="text" id="notes-search" placeholder="Search notes..." class="px-4 py-2 rounded-full bg-white/20 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                </div>
+            </div>
+            
+            <div id="notes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Notes will be dynamically added here -->
+            </div>
+        </section>
+        
+        <!-- Links Page -->
+        <section id="links-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Link Vault</h2>
+                <button id="back-to-home-links" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Back to Home
+                </button>
+            </div>
+            
+            <div class="mb-6 p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="site-name" placeholder="Site Name (e.g., My GitHub)" class="px-4 py-2 rounded-lg bg-white/20 dark:bg-gray-700/30 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="url" id="site-url" placeholder="URL (e.g., https://github.com/username)" class="px-4 py-2 rounded-lg bg-white/20 dark:bg-gray-700/30 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mt-3 flex justify-end">
+                    <button id="save-link" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">Save Link</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <input type="text" id="links-search" placeholder="Search links..." class="px-4 py-2 rounded-full bg-white/20 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                </div>
+            </div>
+            
+            <div id="links-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Links will be dynamically added here -->
+            </div>
+        </section>
+        
+        <!-- PDFs Page -->
+        <section id="pdfs-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My PDF Collection</h2>
+                <button id="back-to-home-pdfs" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Back to Home
+                </button>
+            </div>
+            
+            <div class="mb-6 p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Upload PDF files</p>
+                    <input type="file" id="pdf-upload" accept=".pdf" class="hidden">
+                    <button id="upload-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Choose PDF Files</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <input type="text" id="pdfs-search" placeholder="Search PDFs..." class="px-4 py-2 rounded-full bg-white/20 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                </div>
+            </div>
+            
+            <div id="pdfs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- PDFs will be dynamically added here -->
+            </div>
+        </section>
+        
+        <!-- Images Page -->
+        <section id="images-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Image Gallery</h2>
+                <button id="back-to-home-images" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Back to Home
+                </button>
+            </div>
+            
+            <div class="mb-6 p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Upload image files</p>
+                    <input type="file" id="image-upload" accept="image/*" class="hidden">
+                    <button id="upload-image-btn" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">Choose Image Files</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <input type="text" id="images-search" placeholder="Search images..." class="px-4 py-2 rounded-full bg-white/20 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                </div>
+            </div>
+            
+            <div id="images-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <!-- Images will be dynamically added here -->
+            </div>
+        </section>
+        
+        <!-- Videos Page -->
+        <section id="videos-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Video Library</h2>
+                <button id="back-to-home-videos" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Back to Home
+                </button>
+            </div>
+            
+            <div class="mb-6 p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">Upload video files</p>
+                    <input type="file" id="video-upload" accept="video/*" class="hidden">
+                    <button id="upload-video-btn" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">Choose Video Files</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <input type="text" id="videos-search" placeholder="Search videos..." class="px-4 py-2 rounded-full bg-white/20 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                </div>
+            </div>
+            
+            <div id="videos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Videos will be dynamically added here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Chat Bot -->
+    <div id="chat-container" class="fixed bottom-6 right-6 z-50">
+        <div id="chat-window" class="w-80 h-96 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col hidden">
+            <div class="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-xl text-white">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold">Knowledge Assistant</h3>
+                    <button id="close-chat" class="text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-white/5 dark:bg-black/10">
+                <div class="message bot-message mb-4">
+                    <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg max-w-xs">
+                        Hello! I'm your knowledge assistant. Ask me about your notes, links, or files.
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex">
+                    <input type="text" id="chat-input" placeholder="Ask me anything..." class="flex-1 px-3 py-2 rounded-l-lg bg-white/20 dark:bg-gray-700/30 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="send-message" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="chat-toggle" class="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+            <i class="fas fa-comment text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Lightbox Modal for Images -->
+    <div id="lightbox-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <img id="lightbox-img" src="" alt="Enlarged view" class="max-w-full max-h-full object-contain">
+            <button id="close-lightbox" class="absolute top-4 right-4 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="relative max-w-4xl w-full">
+            <video id="video-player" controls class="w-full max-h-[80vh]"></video>
+            <button id="close-video" class="absolute top-4 right-4 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
